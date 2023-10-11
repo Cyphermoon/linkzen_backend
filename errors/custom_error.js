@@ -3,5 +3,4 @@ class CustomError extends Error {
     super(message);
   }
 }
-
 module.exports = CustomError;
