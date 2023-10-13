@@ -22,10 +22,10 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.use(express.json());
 
-app.use(errorHandlerMiddleware);
-
 // routes
 app.use("/api/v1/auth", authRouter);
+
+app.use(errorHandlerMiddleware);
 
 const start = async () => {
   try {
