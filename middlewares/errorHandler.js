@@ -11,7 +11,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     Object.values(err.errors).forEach(({ properties }) => {
       errors[properties.path] = properties.message;
     });
-    errors.statusCode = 400;
+    errors.statusCode = StatusCodes.BAD_REQUEST;
     errors.msg = err.name;
   }
 
@@ -20,11 +20,12 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     errors.msg = `sorry, user with this ${Object.keys(
       err.keyValue
     )} already exists, please choose another ${Object.keys(err.keyValue)}`;
-    errors.statusCode = 400;
+    errors.statusCode = StatusCodes.BAD_REQUEST;
   }
 
   if (err.name === "CastError") {
-    errors.message = err.message;
+    errors.msg = `No item found with id : ${err.value}`;
+    errors.statusCode = StatusCodes.NOT_FOUND;
   }
   // remove status code from the errors object
   const { statusCode, ...details } = errors;
