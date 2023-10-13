@@ -19,4 +19,4 @@ const sendVerificationEmail = async ({
   }).catch(console.error);
 };
 
-modules.exports = sendVerificationEmail;
+module.exports = sendVerificationEmail;
