@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
-
-const UserSchema = mongoose.Schema(
+const bcrypt = require("bcryptjs");
+const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
       lowercase: true,
       required: [true, "please provide a username"],
-      unique: [true, "sorry, this username has been taken"],
+      unique: true,
       match: [
         /^[a-zA-Z0-9]+$/,
         "sorry, username cannot contain special characters",
@@ -18,7 +18,7 @@ const UserSchema = mongoose.Schema(
     email: {
       type: String,
       required: [true, "please provide an email"],
-      unique: [true, "sorry, a user with this email already exist"],
+      unique: true,
       validate: {
         validator: validator.isEmail,
         message: "please provide a valid email",
@@ -42,7 +42,7 @@ const UserSchema = mongoose.Schema(
         facebook: String,
       },
     },
-    active: { type: Boolean, default: true },
+    active: { type: Boolean, default: false },
     role: {
       type: String,
       enum: ["admin", "user"],
@@ -64,5 +64,12 @@ const UserSchema = mongoose.Schema(
   { timestamp: true }
 );
 
+// hash password before saving to database
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+  next();
+});
 // other logics here
 module.exports = mongoose.model("User", UserSchema);
