@@ -55,10 +55,10 @@ const UserSchema = new mongoose.Schema(
       default: false,
     },
     verified: Date,
-    passwordToken: {
+    forgotPasswordToken: {
       type: String,
     },
-    passwordTokenExpirationDate: {
+    forgotPasswordTokenExpirationDate: {
       type: Date,
     },
   },
@@ -75,7 +75,7 @@ UserSchema.pre("save", async function (next) {
 
 // login a user
 UserSchema.methods.comparePassword = async function (password) {
-  const isMatch = bcrypt.compare(this.password, password);
+  const isMatch = await bcrypt.compare(password, this.password);
   return isMatch;
 };
 
