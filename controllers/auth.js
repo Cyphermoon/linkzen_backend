@@ -1,10 +1,15 @@
 const User = require("../models/User");
 const UnAunthenticatedError = require("../errors/unauthenticated");
+const BadRequestError = require("../errors/bad_request");
 const crypto = require("node:crypto");
 const sendVerificationEmail = require("../utils/sendVerificationEmail");
-const { attachTokenToResponse, removeTokenFromResponse} = require('../utils/handleCookies')
+const sendResetPasswordEmail = require("../utils/sendResetPasswordEmail");
+const {
+  attachTokenToResponse,
+  removeTokenFromResponse,
+} = require("../utils/handleCookies");
 const { StatusCodes } = require("http-status-codes");
-
+const { createHash } = require("node:crypto");
 
 const register = async (req, res) => {
   const { username, email, password } = req.body;
@@ -54,33 +59,108 @@ const verifyEmail = async (req, res) => {
   res.status(StatusCodes.OK).json({ msg: "Email Verified" });
 };
 
-const login = (req, res) => {
-  const { email, password } = req.body
+const login = async (req, res) => {
+  const { email, password } = req.body;
 
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ email });
   if (!user) {
-    throw new UnAunthenticatedError('invalid credentials')
+    throw new UnAunthenticatedError("invalid credentials");
   }
 
-  const isPasswordCorrect = await user.comparePassword(password)
-    if (!isPasswordCorrect) {
-    throw new UnAunthenticatedError('password is not correct')
+  const isPasswordCorrect = await user.comparePassword(password);
+  if (!isPasswordCorrect) {
+    throw new UnAunthenticatedError("password is not correct");
   }
 
   if (!user.isVerified) {
-    throw new UnAunthenticatedError('please verify your email')
+    throw new UnAunthenticatedError("please verify your email");
   }
 
   // create jwt for user
-  const token = user.createJWT()
+  const token = user.createJWT();
   // add token to response as a cookie
-  attachTokenToResponse(res, token)
-  res.status(StatusCodes.OK).json({success:true, user:{id:user._id, username:user.name}})
-}
+  attachTokenToResponse(res, token);
+  res.status(StatusCodes.OK).json({
+    success: true,
+    msg: "login successful",
+    user: { id: user._id, username: user.username },
+  });
+};
 
 const logout = (req, res) => {
   // update after creating isAuthenticated middleware
-  removeTokenFromResponse(res)
-}
+  removeTokenFromResponse(res);
+};
 
-module.exports = { register, verifyEmail, login};
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new UnAunthenticatedError("no user found with this email");
+  }
+
+  //generate reset password token
+  const forgotPasswordToken = crypto.randomBytes(70).toString("hex");
+
+  // send password reset mail
+  await sendResetPasswordEmail({
+    email: user.email,
+    origin: process.env.ORIGIN,
+    username: user.username,
+    token: forgotPasswordToken,
+  });
+
+  const tenMinutes = 1000 * 60 * 10;
+  const forgotPasswordTokenExpirationDate = new Date(Date.now() + tenMinutes);
+  user.forgotPasswordToken = crypto
+    .createHash("sha256")
+    .update(forgotPasswordToken)
+    .digest("hex");
+
+  user.forgotPasswordTokenExpirationDate = forgotPasswordTokenExpirationDate;
+  await user.save();
+
+  // send verification token back only while testing in postman!!!
+  res.status(StatusCodes.OK).json({
+    msg: "Please check your email for reset password link",
+    token: forgotPasswordToken,
+  });
+};
+
+const resetPassword = async (req, res) => {
+  const { email, password, token } = req.body;
+  if (!token) {
+    throw new BadRequestError("invalid token");
+  }
+
+  const user = await User.findOne({ email });
+  if (user) {
+    const currentDate = new Date();
+
+    if (
+      user.forgotPasswordToken ===
+        crypto.createHash("sha256").update(token).digest("hex") &&
+      user.forgotPasswordTokenExpirationDate > currentDate
+    ) {
+      user.password = password;
+      user.forgotPasswordToken = null;
+      user.forgotPasswordTokenExpiration = null;
+      await user.save();
+    } else {
+      throw new BadRequestError("invalid token");
+    }
+  }
+
+  res.status(StatusCodes.OK).json({
+    msg: "password reset successful",
+  });
+};
+
+module.exports = {
+  register,
+  verifyEmail,
+  login,
+  logout,
+  forgotPassword,
+  resetPassword,
+};
