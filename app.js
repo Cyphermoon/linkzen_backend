@@ -7,10 +7,25 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
+const isUserAuthenticated = require("./middlewares/isAuthenticated");
+
+// cloudinary
+const cloudinary = require("cloudinary").v2;
+
+const CLOUD_NAME = process.env.CLOUD_NAME;
+const API_KEY = process.env.API_KEY;
+const API_SECRET = process.env.API_SECRET;
+
+cloudinary.config({
+  cloud_name: CLOUD_NAME,
+  api_key: API_KEY,
+  api_secret: API_SECRET,
+});
 
 const connectDB = require("./db/connect");
 const errorHandlerMiddleware = require("./middlewares/errorHandler");
 const authRouter = require("./routes/auth");
+const profileRouter = require("./routes/profile");
 
 // environment variables
 const PORT = process.env.PORT || 5000;
@@ -27,6 +42,7 @@ app.use(express.urlencoded({ extended: false }));
 
 // routes
 app.use("/api/v1/auth", authRouter);
+app.use("api/v1/profile", isUserAuthenticated, profileRouter);
 
 app.use(errorHandlerMiddleware);
 
