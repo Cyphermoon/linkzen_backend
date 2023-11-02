@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const UserSchema = new mongoose.Schema(
   {
     username: {
@@ -37,7 +38,7 @@ const UserSchema = new mongoose.Schema(
       socials: {
         instagram: String,
         youtube: String,
-        Spotify: String,
+        spotify: String,
         tiktok: String,
         facebook: String,
       },
@@ -54,10 +55,10 @@ const UserSchema = new mongoose.Schema(
       default: false,
     },
     verified: Date,
-    passwordToken: {
+    forgotPasswordToken: {
       type: String,
     },
-    passwordTokenExpirationDate: {
+    forgotPasswordTokenExpirationDate: {
       type: Date,
     },
   },
@@ -71,5 +72,23 @@ UserSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
-// other logics here
+
+// login a user
+UserSchema.methods.comparePassword = async function (password) {
+  const isMatch = await bcrypt.compare(password, this.password);
+  return isMatch;
+};
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_LIFETIME = process.env.JWT_LIFETIME;
+// create jwt
+UserSchema.methods.createJWT = async function () {
+  return jwt.sign(
+    { id: this._id, username: this.username, role: this.role },
+    JWT_SECRET,
+    {
+      expiresIn: JWT_LIFETIME,
+    }
+  );
+};
 module.exports = mongoose.model("User", UserSchema);
