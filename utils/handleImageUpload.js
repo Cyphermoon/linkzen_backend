@@ -1,3 +1,4 @@
+const cloudinary = require("cloudinary").v2;
 const uploadImage = async (imagePath) => {
   const options = {
     use_filename: true,
@@ -14,7 +15,7 @@ const uploadImage = async (imagePath) => {
   }
 };
 
-const createImageTag = (publicId) => {
+const createImageTag = async (publicId) => {
   let imageTag = cloudinary.image(publicId, {
     transformation: [
       { width: 250, height: 250, gravity: "faces", crop: "thumb" },
