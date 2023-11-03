@@ -2,13 +2,20 @@ const UnAunthenticatedError = require("../errors/unauthenticated");
 const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
+
 const isUserAuthenticated = (req, res, next) => {
+  let accessToken;
   const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer")) {
-    throw new UnAunthenticatedError("oops, you need to login");
+  if (authHeader && authHeader.startsWith("Bearer")) {
+    accessToken = authHeader.split(" ")[1];
+    // check cookies
+  } else if (req.cookies.accessToken) {
+    accessToken = req.cookies.accessToken;
   }
 
-  const accessToken = authHeader.split(" ")[1];
+  if (!accessToken) {
+    throw new UnAunthenticatedError("invalid authentication");
+  }
   try {
     const payload = jwt.verify(accessToken, JWT_SECRET);
     if (!req.user) {
@@ -21,6 +28,8 @@ const isUserAuthenticated = (req, res, next) => {
   } catch (err) {
     throw new UnAunthenticatedError("invalid authentication");
   }
+
+  next();
 };
 
 module.exports = isUserAuthenticated;
