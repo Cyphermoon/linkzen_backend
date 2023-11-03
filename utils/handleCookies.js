@@ -6,7 +6,6 @@ const attachTokenToResponse = (res, token) => {
   res.cookie("accessToken", token, {
     httpOnly: true,
     secure: NODE_ENV === "development" ? false : true,
-    signed: true,
     expires: new Date(Date.now() + maxAge),
     sameSite: "Strict",
   });
