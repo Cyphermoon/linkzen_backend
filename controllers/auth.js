@@ -69,7 +69,7 @@ const login = async (req, res) => {
 
   const isPasswordCorrect = await user.comparePassword(password);
   if (!isPasswordCorrect) {
-    throw new UnAunthenticatedError("password is not correct");
+    throw new UnAunthenticatedError("please enter correct login details");
   }
 
   if (!user.isVerified) {
@@ -77,19 +77,21 @@ const login = async (req, res) => {
   }
 
   // create jwt for user
-  const token = user.createJWT();
+  const token = await user.createJWT();
+
   // add token to response as a cookie
   attachTokenToResponse(res, token);
   res.status(StatusCodes.OK).json({
     success: true,
     msg: "login successful",
-    user: { id: user._id, username: user.username },
+    user: { id: user._id, username: user.username, accessToken: token },
   });
 };
 
+// TODO: add conditional to check for Bearer {{token}}
 const logout = (req, res) => {
-  // update after creating isAuthenticated middleware
   removeTokenFromResponse(res);
+  res.status(StatusCodes.OK).json({ msg: "logged out successful" });
 };
 
 const forgotPassword = async (req, res) => {
