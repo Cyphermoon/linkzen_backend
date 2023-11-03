@@ -3,6 +3,7 @@ const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const { uploadImage, createImageTag } = require("../utils/handleImageUpload");
 
+// TODO: fix empty profile field return data
 const getProfile = async (req, res) => {
   const { username } = req.params;
   if (username != req.user.username) {
