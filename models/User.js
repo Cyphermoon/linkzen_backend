@@ -38,7 +38,7 @@ const UserSchema = new mongoose.Schema(
       socials: {
         instagram: String,
         youtube: String,
-        Spotify: String,
+        spotify: String,
         tiktok: String,
         facebook: String,
       },
