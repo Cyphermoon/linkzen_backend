@@ -8,6 +8,7 @@ const cors = require("cors");
 const mongoSanitize = require("express-mongo-sanitize");
 const helmet = require("helmet");
 const isUserAuthenticated = require("./middlewares/isAuthenticated");
+// const createNewLink = require('./controllers/link')
 
 // cloudinary
 const cloudinary = require("cloudinary").v2;
@@ -26,6 +27,7 @@ const connectDB = require("./db/connect");
 const errorHandlerMiddleware = require("./middlewares/errorHandler");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
+const linkRouter = require("./routes/link")
 
 // environment variables
 const PORT = process.env.PORT || 5000;
@@ -43,6 +45,7 @@ app.use(express.urlencoded({ extended: false }));
 // routes
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/profile", isUserAuthenticated, profileRouter);
+app.use("/api/v1/links", isUserAuthenticated, linkRouter);
 
 app.use(errorHandlerMiddleware);
 

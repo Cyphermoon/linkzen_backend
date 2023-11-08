@@ -2,15 +2,16 @@ const BadRequestError = require("../errors/bad_request");
 const User = require("../models/User");
 const { StatusCodes } = require("http-status-codes");
 const { uploadImage, createImageTag } = require("../utils/handleImageUpload");
+const Link = require("../models/Link");
 
 // TODO: fix empty profile field return data
+// TODO: create controller for dashboard request
 const getProfile = async (req, res) => {
   const { username } = req.params;
-  if (username != req.user.username) {
-    throw new BadRequestError("invalid credentials");
-  }
   const user = await User.findOne({ username });
-  res.status(StatusCodes.OK).json({ success: true, user: user.profile });
+  const links = Link.find({createdBy:req.user.id})
+  
+  res.status(StatusCodes.OK).json({ success: true, user: user.profile, links });
 };
 
 const updateProfile = async (req, res) => {
