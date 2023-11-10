@@ -2,15 +2,51 @@ const BadRequestError = require("../errors/bad_request");
 const Link = require("../models/Link");
 const { StatusCodes } = require("http-status-codes");
 
-
 // dashboard links
 const getLinks = async (req, res) => {
-  const links = await Link.find({ createdBy: req.user.id });
+  const { sort } = req.query;
+  let sortCriteria = {};
+
+  if (sort) {
+    switch (sort) {
+      case "createdAtAsc":
+        sortCriteria = { createdAt: 1 };
+        break;
+
+      case "createdAtDesc":
+        sortCriteria = { createdAt: -1 };
+        break;
+
+      case "updatedAtAsc":
+        sortCriteria = { updatedAt: 1 };
+        break;
+
+      case "updatedAtDesc":
+        sortCriteria = { updatedAt: -1 };
+        break;
+
+      case "titleAsc":
+        sortCriteria = { title: 1 };
+        break;
+
+      case "titleDesc":
+        sortCriteria = { title: -1 };
+        break;
+
+      default:
+        // default to descending order
+        sortCriteria = { createdAt: -1 };
+        break;
+    }
+  } else {
+    sortCriteria = { createdAt: -1 };
+  }
+  const links = await Link.find({ createdBy: req.user.id }).sort(sortCriteria);
   if (links.length === 0) {
     return res.status(StatusCodes.OK).json({
       success: true,
       message: "oops, seems you have not created any link yet",
-      count: jobs.length,
+      count: links.length,
     });
   }
 
