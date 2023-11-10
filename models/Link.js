@@ -20,7 +20,10 @@ const LinkSchema = new mongoose.Schema(
       type: String,
       required: [true, "description is required"],
     },
-    tags: [{ type: String }], //TODO: Replace this with a ref it's own model
+    tags: {
+      types: mongoose.Types.ObjectId,
+      ref: "Tag",
+    },
     accessType: {
       type: String,
       enum: ["public", "private"],
