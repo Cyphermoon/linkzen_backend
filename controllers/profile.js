@@ -5,14 +5,16 @@ const { uploadImage, createImageTag } = require("../utils/handleImageUpload");
 const Link = require("../models/Link");
 
 // TODO: fix empty profile field return data
-// TODO: create controller for dashboard request
 const getProfile = async (req, res) => {
   const { username } = req.params;
   const user = await User.findOne({ username });
-  const links = Link.find({createdBy:req.user.id})
-  
-  res.status(StatusCodes.OK).json({ success: true, user: user.profile, links });
+  res.status(StatusCodes.OK).json({ success: true, user: user.profile});
 };
+
+
+// TODO: create getProfileContents controller
+
+
 
 const updateProfile = async (req, res) => {
   const { username } = req.params;
