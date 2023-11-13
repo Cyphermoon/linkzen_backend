@@ -31,16 +31,53 @@ const UserSchema = new mongoose.Schema(
       minlength: [6, "password cannot be less than 6 characters"],
     },
     profile: {
-      firstName: String,
-      lastName: String,
-      avatar: String,
-      bio: String,
+      firstName: {
+        type: String,
+        maxlength: [15, "firstname cannot be more than 15 characters"],
+        default: "",
+      },
+      lastName: {
+        type: String,
+        maxlength: [15, "lastname cannot be more than 15 characters"],
+        default: "",
+      },
+
+      //TODO: collect for the default avatar image url
+      avatar: {
+        type: String,
+        default: "",
+      },
+      bio: {
+        type: String,
+        maxlength: [250, "bio cannot be more than 250 characters"],
+        default: "",
+      },
       socials: {
-        instagram: String,
-        youtube: String,
-        spotify: String,
-        tiktok: String,
-        facebook: String,
+        instagram: {
+          type: String,
+          default: "",
+        },
+        youtube: {
+          type: String,
+          default: "",
+        },
+        spotify: {
+          type: String,
+          default: "",
+        },
+        tiktok: {
+          type: String,
+          default: "",
+        },
+        facebook: {
+          type: String,
+          default: "",
+        },
+      },
+      layoutPreference: {
+        type: String,
+        enum: ["list", "grid"],
+        default: "list",
       },
     },
     active: { type: Boolean, default: false },

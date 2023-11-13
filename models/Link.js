@@ -20,10 +20,10 @@ const LinkSchema = new mongoose.Schema(
       type: String,
       required: [true, "description is required"],
     },
-    tags: {
-      types: mongoose.Types.ObjectId,
+    tags: [{
+      type: mongoose.Types.ObjectId,
       ref: "Tag",
-    },
+    }],
     accessType: {
       type: String,
       enum: ["public", "private"],
