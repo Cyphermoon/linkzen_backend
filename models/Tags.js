@@ -7,6 +7,12 @@ const TagSchema = new mongoose.Schema(
       maxlength: [20,"tag name should not be more than 20 characters"],
       required: [true, "name is required"],
     },
+    links: [
+      {
+        type: mongoose.Types.ObjectId,
+        ref: "Link"
+      }
+    ]
   },
 );
 
