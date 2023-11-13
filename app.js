@@ -27,7 +27,7 @@ const connectDB = require("./db/connect");
 const errorHandlerMiddleware = require("./middlewares/errorHandler");
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
-const linkRouter = require("./routes/link")
+const linkRouter = require("./routes/link");
 
 // environment variables
 const PORT = process.env.PORT || 5000;
