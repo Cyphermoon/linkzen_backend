@@ -1,6 +1,7 @@
 const express = require("express");
 const {
   getLinks,
+  getLinksByTag,
   createNewLink,
   updateLink,
   deleteLink,
@@ -8,7 +9,8 @@ const {
 const router = express.Router();
 
 router.get("/", getLinks);
-router.post("/:username/links", createNewLink);
+router.get("/:id/tag-links", getLinksByTag);
+router.post("/:username/link", createNewLink);
 router.put("/:id", updateLink);
 router.destroy("/:id", deleteLink);
 
